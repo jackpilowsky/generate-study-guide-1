@@ -53,7 +53,7 @@ export default function Home() {
                 value={interviewDate}
                 onChange={(e) => setInterviewDate(e.target.value)}
                 min={getTomorrowDate()}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                 required
               />
             </div>
@@ -67,7 +67,7 @@ export default function Home() {
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 rows={12}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical text-gray-900 placeholder-gray-500"
                 placeholder="Paste the complete job description here..."
                 required
               />

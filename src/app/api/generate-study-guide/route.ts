@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a helpful assistant that creates comprehensive study guides for technical interviews. Provide specific, actionable resources with links when possible.'
+                        content: 'You are a helpful assistant that creates comprehensive study guides for technical interviews. Provide specific, actionable resources with links when possible. Format your response using markdown syntax for better structure and readability.'
                     },
                     {
                         role: 'user',
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
 
         if (!response.ok) {
             const errorData = await response.json();
+
             console.error('OpenAI API error:', errorData);
             return NextResponse.json(
                 { error: 'Failed to generate study guide' },

@@ -2,14 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 export default function Results() {
     const [studyGuide, setStudyGuide] = useState('');
+    const [studyGuideHTML, setStudyGuideHTML] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [interviewDate, setInterviewDate] = useState('');
 
     const router = useRouter();
+
+    // Convert markdown to sanitized HTML
+    const convertMarkdownToHTML = async (markdown: string): Promise<string> => {
+        const rawHTML = await marked(markdown);
+        return DOMPurify.sanitize(rawHTML);
+    };
 
     useEffect(() => {
         // Get data from sessionStorage
@@ -32,6 +41,13 @@ export default function Results() {
         // Generate the study guide
         generateStudyGuide(daysDiff, storedDescription);
     }, [router]);
+
+    // Convert markdown to HTML when studyGuide changes
+    useEffect(() => {
+        if (studyGuide) {
+            convertMarkdownToHTML(studyGuide).then(setStudyGuideHTML);
+        }
+    }, [studyGuide]);
 
     const generateStudyGuide = async (daysUntilInterview: number, description: string) => {
         try {
@@ -108,9 +124,10 @@ export default function Results() {
                         </div>
                     ) : (
                         <div className="prose max-w-none">
-                            <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                                {studyGuide}
-                            </div>
+                            <div
+                                className="text-gray-800 leading-relaxed"
+                                dangerouslySetInnerHTML={{ __html: studyGuideHTML }}
+                            />
                         </div>
                     )}
                 </div>
