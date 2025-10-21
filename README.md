@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Coding Interview Prep Study Guide Generator
 
-## Getting Started
+A Next.js application that generates personalized study guides for coding interviews based on job descriptions and interview timelines using OpenAI's API.
 
-First, run the development server:
+## Features
+
+- **Smart Form**: Input your interview date (minimum tomorrow) and job description
+- **AI-Powered**: Uses OpenAI's GPT-3.5-turbo to generate personalized study resources
+- **Focused Resources**: Provides advanced and intermediate-level free online resources, video tutorials, and classes
+- **Timeline-Aware**: Considers the number of days until your interview for optimal preparation planning
+
+## Setup
+
+1. **Clone and Install**:
+   ```bash
+   npm install
+   ```
+
+2. **Environment Variables**:
+   - Copy `.env.example` to `.env.local`
+   - Add your OpenAI API key:
+     ```
+     OPENAI_API_KEY=your_openai_api_key_here
+     ```
+
+3. **Get OpenAI API Key**:
+   - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   - Create a new API key
+   - Add it to your `.env.local` file
+
+## Running the App
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to use the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Home Page**: Enter your interview date and paste the job description
+2. **Results Page**: AI generates a customized study guide with:
+   - Free online resources
+   - Video tutorials and classes
+   - Advanced and intermediate-level content
+   - Timeline-specific recommendations
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Next.js 15** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **OpenAI API** for AI-powered content generation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The app uses OpenAI's `gpt-3.5-turbo` model to generate study guides. Make sure you have sufficient API credits in your OpenAI account.
