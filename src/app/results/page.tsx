@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 export default function Results() {
     const [studyGuide, setStudyGuide] = useState('');
@@ -84,28 +83,111 @@ export default function Results() {
     };
 
     const downloadPDF = async () => {
-        if (!contentRef.current) return;
+        if (!studyGuide) return;
 
         setDownloadingPDF(true);
         try {
-            const canvas = await html2canvas(contentRef.current, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-            });
-
-            const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 20;
+            const maxWidth = pageWidth - (margin * 2);
+            let yPosition = margin;
 
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-            const imgX = (pdfWidth - imgWidth * ratio) / 2;
-            const imgY = 30;
+            // Add title
+            pdf.setFontSize(20);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Your Personalized Study Guide', margin, yPosition);
+            yPosition += 10;
 
-            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+            // Add interview date
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`Interview Date: ${new Date(interviewDate).toLocaleDateString()}`, margin, yPosition);
+            yPosition += 15;
+
+            // Parse the HTML content to extract text and links
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = studyGuideHTML;
+
+            // Simple text extraction with basic formatting
+            const extractTextContent = (element: Element): string => {
+                let text = '';
+                for (const node of Array.from(element.childNodes)) {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        text += node.textContent || '';
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        const el = node as Element;
+                        if (el.tagName === 'A') {
+                            text += `${el.textContent} (${el.getAttribute('href')})`;
+                        } else {
+                            text += extractTextContent(el);
+                        }
+                    }
+                }
+                return text;
+            };
+
+            // Process each element
+            for (const element of Array.from(tempDiv.children)) {
+                if (yPosition > pageHeight - margin - 20) {
+                    pdf.addPage();
+                    yPosition = margin;
+                }
+
+                const tagName = element.tagName.toLowerCase();
+                const text = extractTextContent(element);
+
+                if (!text.trim()) continue;
+
+                switch (tagName) {
+                    case 'h1':
+                    case 'h2':
+                        pdf.setFontSize(16);
+                        pdf.setFont('helvetica', 'bold');
+                        const h2Lines = pdf.splitTextToSize(text, maxWidth);
+                        pdf.text(h2Lines, margin, yPosition);
+                        yPosition += h2Lines.length * 8 + 5;
+                        break;
+
+                    case 'h3':
+                    case 'h4':
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        const h3Lines = pdf.splitTextToSize(text, maxWidth);
+                        pdf.text(h3Lines, margin, yPosition);
+                        yPosition += h3Lines.length * 7 + 4;
+                        break;
+
+                    case 'ul':
+                    case 'ol':
+                        const listItems = element.querySelectorAll('li');
+                        listItems.forEach((li, index) => {
+                            if (yPosition > pageHeight - margin - 10) {
+                                pdf.addPage();
+                                yPosition = margin;
+                            }
+
+                            pdf.setFontSize(11);
+                            pdf.setFont('helvetica', 'normal');
+                            const bullet = tagName === 'ul' ? '• ' : `${index + 1}. `;
+                            const liText = extractTextContent(li);
+                            const liLines = pdf.splitTextToSize(bullet + liText, maxWidth - 5);
+                            pdf.text(liLines, margin + 5, yPosition);
+                            yPosition += liLines.length * 6 + 2;
+                        });
+                        yPosition += 5;
+                        break;
+
+                    default:
+                        pdf.setFontSize(11);
+                        pdf.setFont('helvetica', 'normal');
+                        const pLines = pdf.splitTextToSize(text, maxWidth);
+                        pdf.text(pLines, margin, yPosition);
+                        yPosition += pLines.length * 6 + 4;
+                        break;
+                }
+            }
 
             const fileName = `study-guide-${new Date(interviewDate).toISOString().split('T')[0]}.pdf`;
             pdf.save(fileName);
